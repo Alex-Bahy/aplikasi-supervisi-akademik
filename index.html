@@ -1,0 +1,648 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Instrumen Supervisi Akademik - SMKN 1 Maluku Tengah</title>
+    <!-- Tailwind CSS CDN -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <!-- FontAwesome Icons -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Google Fonts Inter -->
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Inter', sans-serif; }
+        .tab-active { border-bottom: 3px solid #2563eb; color: #2563eb; font-weight: 600; }
+        @media print {
+            .no-print { display: none !important; }
+            .print-only { display: block !important; }
+            body { background: white; color: black; }
+            .card-shadow { box-shadow: none !important; border: 1px solid #ccc; }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 text-slate-800 min-h-screen flex flex-col">
+
+    <header class="bg-indigo-900 text-white shadow-lg sticky top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 py-3 sm:px-6 lg:px-8 flex flex-wrap justify-between items-center gap-3">
+            <div class="flex items-center space-x-3">
+                <div class="bg-white p-2 rounded-lg text-indigo-900 font-bold text-xl shadow">
+                    <i class="fa-solid fa-graduation-cap"></i>
+                </div>
+                <div>
+                    <h1 class="text-lg font-bold leading-tight sm:text-xl">SMK NEGERI 1 MALUKU TENGAH</h1>
+                    <p class="text-xs text-indigo-200">Supervisi Akademik Deep Learning (Mindful, Meaningful, Joyful) • T.P. 2026/2027</p>
+                </div>
+            </div>
+            
+            <div class="flex items-center gap-2 no-print">
+                <button onclick="openSettingsModal()" class="bg-indigo-800 hover:bg-indigo-700 text-xs sm:text-sm px-3 py-2 rounded-lg transition flex items-center gap-1 border border-indigo-700">
+                    <i class="fa-solid fa-gear"></i> <span class="hidden sm:inline">Set Script URL</span>
+                </button>
+                <button onclick="window.print()" class="bg-slate-700 hover:bg-slate-600 text-xs sm:text-sm px-3 py-2 rounded-lg transition flex items-center gap-1">
+                    <i class="fa-solid fa-print"></i> <span class="hidden sm:inline">Cetak</span>
+                </button>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto w-full px-4 pt-4 no-print">
+        <div id="urlWarning" class="hidden bg-amber-50 border-l-4 border-amber-500 p-3 rounded text-sm text-amber-800 mb-2 flex justify-between items-center">
+            <span><i class="fa-solid fa-triangle-exclamation mr-1"></i> URL Google Apps Script belum diatur. Hasil supervisi belum bisa terkirim otomatis ke Google Sheets.</span>
+            <button onclick="openSettingsModal()" class="underline font-semibold ml-2">Atur Sekarang</button>
+        </div>
+    </div>
+
+    <!-- MAIN CONTAINER -->
+    <main class="max-w-7xl mx-auto px-4 py-4 sm:px-6 lg:px-8 flex-1 w-full">
+        
+        <div class="bg-white rounded-xl shadow-sm border border-slate-200 mb-6 no-print overflow-x-auto">
+            <div class="flex border-b border-slate-200 min-w-max">
+                <button onclick="switchTab('identitas')" id="tab-identitas" class="tab-btn tab-active px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-id-card"></i> Identitas
+                </button>
+                <button onclick="switchTab('inst1')" id="tab-inst1" class="tab-btn text-slate-500 px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-file-lines"></i> 1. Modul Ajar
+                </button>
+                <button onclick="switchTab('inst2')" id="tab-inst2" class="tab-btn text-slate-500 px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-chalkboard-user"></i> 2. Observasi Kelas
+                </button>
+                <button onclick="switchTab('inst3')" id="tab-inst3" class="tab-btn text-slate-500 px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-gears"></i> 3. Kekhususan SMK
+                </button>
+                <button onclick="switchTab('refleksi')" id="tab-refleksi" class="tab-btn text-slate-500 px-5 py-3 text-sm font-medium transition flex items-center gap-2">
+                    <i class="fa-solid fa-comments"></i> 4. Refleksi & Hasil
+                </button>
+            </div>
+        </div>
+
+        <form id="supervisiForm" onsubmit="handleFormSubmit(event)">
+            
+            <div id="sec-identitas" class="tab-content block space-y-6">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <h2 class="text-base font-bold text-indigo-900 border-b pb-2 mb-4 flex items-center gap-2">
+                        <i class="fa-solid fa-circle-info text-indigo-600"></i> Identitas Pelaksanaan Supervisi
+                    </h2>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-sm">
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Nama Sekolah</label>
+                            <input type="text" id="namaSekolah" value="SMK Negeri 1 Maluku Tengah" readonly class="w-full p-2.5 bg-slate-100 border border-slate-300 rounded-lg text-slate-600 font-semibold">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Nama Guru (Pilih Terdaftar)</label>
+                            <select id="namaGuru" required onchange="autoFillGuru()" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 font-medium">
+                                <option value="">-- Pilih Nama Guru --</option>
+                            </select>
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">NIP / NUPTK</label>
+                            <input type="text" id="nip" placeholder="Masukkan NIP/NUPTK" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Kompetensi Keahlian</label>
+                            <input type="text" id="kompetensi" required placeholder="Contoh: Teknik Komputer & Jaringan" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Mata Pelajaran / Elemen</label>
+                            <input type="text" id="mapel" required placeholder="Contoh: Pemrograman Web / Dasar Keahlian" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Kelas / Fase</label>
+                            <input type="text" id="kelas" required placeholder="Contoh: XI RPL / Fase F" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Hari, Tanggal</label>
+                            <input type="date" id="tanggal" required class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Jam ke- / Waktu</label>
+                            <input type="text" id="waktu" placeholder="Contoh: 1-3 (07.30 - 09.45 WIT)" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Materi Pokok</label>
+                            <input type="text" id="materi" required placeholder="Contoh: Pembuatan REST API Node.js" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+
+                        <div>
+                            <label class="block font-medium text-slate-700 mb-1">Nama Supervisor</label>
+                            <input type="text" id="supervisor" required placeholder="Nama Kepala Sekolah / Tim Supervisor" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500">
+                        </div>
+                    </div>
+
+                    <div class="mt-6 flex justify-end">
+                        <button type="button" onclick="switchTab('inst1')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold transition flex items-center gap-2">
+                            Lanjut ke Instrumen 1 <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-inst1" class="tab-content hidden space-y-4">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-indigo-900">
+                            Instrumen 1 — Telaah Perangkat Pembelajaran (Modul Ajar)
+                        </h2>
+                        <span class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">13 Indikator</span>
+                    </div>
+
+                    <div id="container-inst1" class="space-y-4"></div>
+
+                    <div class="mt-6 flex justify-between">
+                        <button type="button" onclick="switchTab('identitas')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali
+                        </button>
+                        <button type="button" onclick="switchTab('inst2')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2">
+                            Lanjut ke Instrumen 2 <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-inst2" class="tab-content hidden space-y-4">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-indigo-900">
+                            Instrumen 2 — Observasi Pelaksanaan Pembelajaran
+                        </h2>
+                        <span class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">16 Indikator</span>
+                    </div>
+
+                    <div id="container-inst2" class="space-y-4"></div>
+
+                    <div class="mt-6 flex justify-between">
+                        <button type="button" onclick="switchTab('inst1')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali
+                        </button>
+                        <button type="button" onclick="switchTab('inst3')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2">
+                            Lanjut ke Instrumen 3 <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-inst3" class="tab-content hidden space-y-4">
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm">
+                    <div class="flex justify-between items-center border-b pb-3 mb-4">
+                        <h2 class="text-base font-bold text-indigo-900">
+                            Instrumen 3 — Aspek Kekhususan Sekolah Menengah Kejuruan (SMK)
+                        </h2>
+                        <span class="text-xs bg-indigo-100 text-indigo-800 font-semibold px-2.5 py-1 rounded-full">5 Indikator</span>
+                    </div>
+
+                    <div id="container-inst3" class="space-y-4"></div>
+
+                    <div class="mt-6 flex justify-between">
+                        <button type="button" onclick="switchTab('inst2')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold">
+                            <i class="fa-solid fa-arrow-left"></i> Kembali
+                        </button>
+                        <button type="button" onclick="switchTab('refleksi')" class="bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-sm font-semibold flex items-center gap-2">
+                            Lanjut ke Refleksi & Hasil <i class="fa-solid fa-arrow-right"></i>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="sec-refleksi" class="tab-content hidden space-y-6">
+                
+                <!-- Score Card Display -->
+                <div class="bg-gradient-to-r from-indigo-900 to-slate-900 text-white rounded-xl p-6 shadow-md border border-indigo-800">
+                    <h3 class="text-sm font-medium text-indigo-200 uppercase tracking-wider mb-2">Rekapitulasi Hasil Supervisi</h3>
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 items-center">
+                        <div>
+                            <div class="text-xs text-indigo-300">Total Perolehan Skor</div>
+                            <div class="text-3xl font-extrabold mt-1"><span id="totalSkorDisplay">0</span> <span class="text-base font-normal text-indigo-300">/ 136</span></div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-indigo-300">Nilai Akhir (Skala 100)</div>
+                            <div class="text-4xl font-black text-amber-400 mt-1" id="nilaiAkhirDisplay">0.00</div>
+                        </div>
+                        <div>
+                            <div class="text-xs text-indigo-300">Kategori Predikat</div>
+                            <div class="inline-block px-4 py-1.5 rounded-full text-base font-bold mt-2" id="kategoriBadge">
+                                Belum Lengkap
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Refleksi & Wawancara Form -->
+                <div class="bg-white rounded-xl p-5 border border-slate-200 shadow-sm space-y-4">
+                    <h2 class="text-base font-bold text-indigo-900 border-b pb-2 flex items-center gap-2">
+                        <i class="fa-solid fa-comments text-indigo-600"></i> Refleksi dan Wawancara Pasca-Observasi
+                    </h2>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            1. Bagian mana dari pembelajaran hari ini yang menurut Bapak/Ibu Guru paling berhasil menumbuhkan pemahaman mendalam (mindful) pada siswa?
+                        </label>
+                        <textarea id="refleksi1" rows="2" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Tuliskan hasil diskusi..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            2. Bagaimana Bapak/Ibu Guru mengaitkan materi pembelajaran dengan konteks dunia kerja/industri (meaningful) pada pertemuan ini?
+                        </label>
+                        <textarea id="refleksi2" rows="2" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Tuliskan hasil diskusi..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            3. Kendala apa yang dihadapi dalam menciptakan suasana belajar yang menyenangkan (joyful) di kelas/bengkel praktik?
+                        </label>
+                        <textarea id="refleksi3" rows="2" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Tuliskan kendala..."></textarea>
+                    </div>
+
+                    <div>
+                        <label class="block text-sm font-semibold text-slate-700 mb-1">
+                            4. Apa rencana perbaikan atau pengembangan yang akan dilakukan pada pertemuan berikutnya?
+                        </label>
+                        <textarea id="refleksi4" rows="2" class="w-full p-2.5 bg-white border border-slate-300 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm" placeholder="Tuliskan rencana perbaikan..."></textarea>
+                    </div>
+
+                    <div class="pt-2">
+                        <label class="block text-sm font-bold text-slate-800 mb-1">
+                            Catatan dan Rencana Tindak Lanjut Pembinaan (Supervisor):
+                        </label>
+                        <textarea id="catatanPembinaan" rows="3" class="w-full p-2.5 bg-indigo-50/50 border border-indigo-200 rounded-lg focus:ring-2 focus:ring-indigo-500 text-sm font-medium" placeholder="Tuliskan catatan pembinaan supervisor..."></textarea>
+                    </div>
+                </div>
+
+                <!-- Submit & Share Actions Bar -->
+                <div class="bg-slate-100 p-4 rounded-xl border border-slate-200 flex flex-wrap justify-between items-center gap-3 no-print">
+                    <button type="button" onclick="switchTab('inst3')" class="bg-slate-200 hover:bg-slate-300 text-slate-700 px-5 py-2.5 rounded-lg text-sm font-semibold">
+                        <i class="fa-solid fa-arrow-left"></i> Kembali
+                    </button>
+
+                    <div class="flex flex-wrap items-center gap-2 w-full sm:w-auto">
+                        <button type="button" onclick="sendWhatsApp()" class="flex-1 sm:flex-none bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2.5 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2">
+                            <i class="fa-brands fa-whatsapp text-lg"></i> Kirim WA
+                        </button>
+
+                        <button type="submit" id="btnSubmit" class="flex-1 sm:flex-none bg-indigo-600 hover:bg-indigo-700 text-white px-6 py-2.5 rounded-lg text-sm font-bold transition flex items-center justify-center gap-2">
+                            <i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Sheets
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </form>
+    </main>
+
+    <div id="settingsModal" class="fixed inset-0 bg-slate-900/60 backdrop-blur-sm hidden items-center justify-center z-50 p-4 no-print">
+        <div class="bg-white rounded-2xl max-w-md w-full p-6 shadow-xl border border-slate-100">
+            <div class="flex justify-between items-center mb-4">
+                <h3 class="text-base font-bold text-slate-800 flex items-center gap-2">
+                    <i class="fa-solid fa-link text-indigo-600"></i> Pengaturan Web App URL
+                </h3>
+                <button onclick="closeSettingsModal()" class="text-slate-400 hover:text-slate-600"><i class="fa-solid fa-xmark text-lg"></i></button>
+            </div>
+            <p class="text-xs text-slate-600 mb-3">
+                Pastekan URL Google Apps Script yang telah Anda *Deploy* dari Google Sheets agar data supervisi langsung tersimpan.
+            </p>
+            <input type="url" id="inputScriptUrl" placeholder="https://script.google.com/macros/s/.../exec" class="w-full p-2.5 border border-slate-300 rounded-lg text-xs font-mono mb-4 focus:ring-2 focus:ring-indigo-500">
+            <div class="flex justify-end gap-2">
+                <button onclick="closeSettingsModal()" class="px-4 py-2 text-xs font-semibold text-slate-600 bg-slate-100 rounded-lg">Batal</button>
+                <button onclick="saveSettings()" class="px-4 py-2 text-xs font-semibold text-white bg-indigo-600 hover:bg-indigo-700 rounded-lg">Simpan</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // =========================================================================
+        // PASTEKAN URL HASIL DEPLOY GOOGLE APPS SCRIPT ANDA DI DALAM TANDA PETIK:
+        // Contoh: const DEFAULT_GAS_URL = "https://script.google.com/macros/s/AKfycbx.../exec";
+        // =========================================================================
+        const DEFAULT_GAS_URL = "PASTE_URL_GOOGLE_APPS_SCRIPT_DI_SINI"; 
+
+        // Prioritaskan URL bawaan kode agar langsung bisa dipakai dari HP/Laptop mana saja
+        function getScriptUrl() {
+            if (DEFAULT_GAS_URL && DEFAULT_GAS_URL.trim() !== '' && DEFAULT_GAS_URL !== "PASTE_URL_GOOGLE_APPS_SCRIPT_DI_SINI") {
+                return DEFAULT_GAS_URL.trim();
+            }
+            const storedUrl = localStorage.getItem('gas_supervisi_url');
+            if (storedUrl && storedUrl.trim() !== '') {
+                return storedUrl.trim();
+            }
+            return '';
+        }
+
+        // List of 40 Preset Teachers
+        const GURU_LIST = [
+            "N. Ch. Elias, S.Pd.,M.Pd", "Mani Jamaludin, S.Kom", "T.S. Polnaya, S.Th",
+            "Dahasian, S.Pd.,Gr", "E. Tamaela, A.Md", "Axl Denis Hallatu, S.Kom",
+            "Semby Singadji, S.Kom", "F.L. Pelletimu, S.Th", "Diwanti Wally, A.Md",
+            "H.S. Kapressy, S.Pd.,M.Pd", "Ratmala, S.AP", "Suharja Duhalim, S.Pd",
+            "M. Siwabessy, S.Tr.Par", "Netri Wailaruno, S.Pd", "R. Lewenussa, S.Pd",
+            "Lukas M. Wacanno, S.Pd", "Alchressdo Latumeirissa, S.Pd", "Dani Iswanti, S.Sos",
+            "B.W. Tanamal, S.Pd", "Kalsum Mony, S.Pd", "D. Simaela, S.Pd",
+            "Abdul Manan Payapo, S.T", "H. Salampessy, SE", "Daud Ali Pakan, S.Pd",
+            "Wa Mulina, S.Pd", "Abraham A.W.J. Soplantila, S.Tr.Par", "Marwana Nurdin, SST",
+            "R.Y. Ririhena, S.PdKom", "Papuangan Syamsudin, A.Md", "A. Leuwol, S.Pd",
+            "Yulan Talarima, S.Pd.,Gr", "V. Ruhukail, S.Pd", "R. A. Ririhena, SM.Gr",
+            "Djumiaty, S.PdI", "O.A. Lawalata, S.Pd", "Boki Tuasikal",
+            "T.M.A. Kappuw, S.Pd", "E.A. Wacanno, S.Pd", "R. E. Ruhukail, S.Pd.,M.Pd",
+            "M. Kunu, S.Pd", "J. Resiloy", "A. Bahy, S.Pd.,M.Pd",
+            "Gloria Stevana Pattiradjawane, S.Tr.TI"
+        ];
+
+        // Supervision Indicators Definitions
+        const INST1_ITEMS = [
+            { category: "A. Identitas, Capaian, dan Tujuan Pembelajaran", items: [
+                "Modul ajar memuat identitas, capaian pembelajaran (CP), dan tujuan pembelajaran (TP) yang dirumuskan secara jelas dan terukur",
+                "Tujuan pembelajaran selaras dengan capaian kompetensi keahlian dan kebutuhan dunia kerja/industri",
+                "Modul ajar memuat pemahaman bermakna (meaningful) yang mengaitkan materi dengan kehidupan nyata dan dunia kerja",
+                "Modul ajar memuat pertanyaan pemantik yang membangun kesadaran belajar (mindful) peserta didik"
+            ]},
+            { category: "B. Rancangan Kegiatan Berbasis Pembelajaran Mendalam", items: [
+                "Rancangan kegiatan pembelajaran mencerminkan prinsip berkesadaran (mindful learning) — mendorong siswa memahami tujuan dan proses belajarnya sendiri",
+                "Rancangan kegiatan pembelajaran mencerminkan prinsip bermakna (meaningful learning) — mengaitkan konsep dengan konteks nyata/dunia kerja",
+                "Rancangan kegiatan pembelajaran mencerminkan prinsip menggembirakan (joyful learning) — menghadirkan suasana belajar yang aktif dan menyenangkan",
+                "Modul ajar merancang pembelajaran berdiferensiasi sesuai kesiapan, minat, dan profil belajar peserta didik",
+                "Modul ajar mengintegrasikan penguatan dimensi profil lulusan/karakter peserta didik"
+            ]},
+            { category: "C. Asesmen dan Sumber Belajar", items: [
+                "Modul ajar memuat rencana asesmen awal (diagnostik), formatif, dan sumatif yang selaras dengan tujuan pembelajaran",
+                "Modul ajar memuat kriteria ketercapaian tujuan pembelajaran (KKTP) yang jelas",
+                "Modul ajar merancang pemanfaatan sarana praktik/bengkel/teknologi sesuai kompetensi keahlian",
+                "Modul ajar mencantumkan sumber dan media belajar yang relevan dan kontekstual dengan dunia usaha/dunia industri (DUDIKA)"
+            ]}
+        ];
+
+        const INST2_ITEMS = [
+            { category: "A. Kegiatan Pendahuluan", items: [
+                "Guru membuka pembelajaran, menyampaikan tujuan, dan mengajukan pertanyaan pemantik untuk membangun kesadaran belajar siswa",
+                "Guru mengaitkan materi dengan pengalaman dan pengetahuan awal siswa",
+                "Guru menciptakan suasana pembelajaran yang menyenangkan sejak awal kegiatan"
+            ]},
+            { category: "B. Kegiatan Inti — Penerapan Mindful, Meaningful, Joyful Learning", items: [
+                "Guru memfasilitasi siswa memahami konsep secara mendalam dan bermakna, bukan sekadar menghafal (mindful)",
+                "Guru mengaitkan materi pembelajaran dengan konteks nyata, isu aktual, dan/atau dunia kerja (meaningful)",
+                "Guru memberikan kesempatan siswa untuk bernalar kritis, memecahkan masalah, dan berkreasi",
+                "Guru memfasilitasi kolaborasi, diskusi, dan interaksi aktif antarpeserta didik",
+                "Guru menciptakan suasana pembelajaran yang positif, interaktif, dan menyenangkan (joyful)",
+                "Guru menerapkan pembelajaran berdiferensiasi sesuai kebutuhan belajar siswa",
+                "Guru memanfaatkan media, alat, bahan, dan/atau sarana praktik sesuai kompetensi keahlian secara optimal",
+                "Guru menerapkan prinsip Keselamatan dan Kesehatan Kerja (K3) selama praktik di bengkel/laboratorium",
+                "Guru melaksanakan asesmen formatif untuk memantau perkembangan belajar siswa",
+                "Guru memberikan umpan balik yang membangun dan mendorong refleksi siswa"
+            ]},
+            { category: "C. Kegiatan Penutup", items: [
+                "Guru bersama siswa melakukan refleksi terhadap proses dan hasil belajar yang telah dilalui",
+                "Guru menyimpulkan pembelajaran bersama siswa dan mengaitkannya dengan kompetensi keahlian/dunia kerja",
+                "Guru menyampaikan rencana tindak lanjut pembelajaran berikutnya"
+            ]}
+        ];
+
+        const INST3_ITEMS = [
+            { category: "Aspek Kekhususan Sekolah Menengah Kejuruan (SMK)", items: [
+                "Kesesuaian pelaksanaan pembelajaran dengan capaian kompetensi pada kompetensi keahlian yang diampu",
+                "Keterkaitan pembelajaran dengan kebutuhan dunia usaha, dunia industri, dan dunia kerja (link and match dengan DUDIKA)",
+                "Pemanfaatan pengalaman praktik kerja lapangan/teaching factory sebagai konteks pembelajaran mendalam",
+                "Penguatan kesiapan kerja, kemandirian, dan jiwa kewirausahaan peserta didik",
+                "Kelayakan dan pemanfaatan sarana-prasarana praktik/bengkel/laboratorium yang mendukung pembelajaran"
+            ]}
+        ];
+
+        window.addEventListener('DOMContentLoaded', () => {
+            initTeacherDropdown();
+            renderInstruments('container-inst1', INST1_ITEMS, 'inst1');
+            renderInstruments('container-inst2', INST2_ITEMS, 'inst2');
+            renderInstruments('container-inst3', INST3_ITEMS, 'inst3');
+            
+            // Set default date to today
+            document.getElementById('tanggal').valueAsDate = new Date();
+            
+            // Check stored script URL
+            checkScriptUrl();
+        });
+
+        function initTeacherDropdown() {
+            const select = document.getElementById('namaGuru');
+            GURU_LIST.sort().forEach(guru => {
+                const opt = document.createElement('option');
+                opt.value = guru;
+                opt.textContent = guru;
+                select.appendChild(opt);
+            });
+        }
+
+        function autoFillGuru() {
+            // Optional preset mapping if needed
+        }
+
+        function renderInstruments(containerId, dataGroup, prefix) {
+            const container = document.getElementById(containerId);
+            let globalIdx = 1;
+
+            dataGroup.forEach(group => {
+                const groupDiv = document.createElement('div');
+                groupDiv.className = "mb-6 border-b pb-4 border-slate-100";
+                groupDiv.innerHTML = `<h3 class="font-bold text-indigo-800 text-sm mb-3 bg-indigo-50/70 p-2 rounded">${group.category}</h3>`;
+
+                group.items.forEach(item => {
+                    const itemKey = `${prefix}_${globalIdx}`;
+                    const row = document.createElement('div');
+                    row.className = "bg-slate-50 p-3 rounded-lg border border-slate-200/80 mb-3 hover:bg-slate-100/80 transition";
+                    row.innerHTML = `
+                        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3">
+                            <div class="text-xs sm:text-sm text-slate-800 font-medium md:w-3/5">
+                                <span class="font-bold text-indigo-700 mr-1">${globalIdx}.</span> ${item}
+                            </div>
+                            <div class="flex items-center gap-2 md:w-2/5 justify-between md:justify-end">
+                                <div class="flex items-center bg-white p-1 rounded-lg border border-slate-300 shadow-sm">
+                                    ${[1, 2, 3, 4].map(score => `
+                                        <label class="cursor-pointer px-2.5 py-1 text-xs font-bold rounded transition hover:bg-slate-100 flex items-center justify-center">
+                                            <input type="radio" name="${itemKey}_score" value="${score}" onchange="calculateScore()" required class="hidden peer">
+                                            <span class="peer-checked:bg-indigo-600 peer-checked:text-white px-2 py-0.5 rounded text-slate-700">${score}</span>
+                                        </label>
+                                    `).join('')}
+                                </div>
+                            </div>
+                        </div>
+                        <div class="mt-2">
+                            <input type="text" id="${itemKey}_catatan" placeholder="Catatan supervisor (opsional)..." class="w-full text-xs p-2 bg-white border border-slate-200 rounded focus:ring-1 focus:ring-indigo-500">
+                        </div>
+                    `;
+                    groupDiv.appendChild(row);
+                    globalIdx++;
+                });
+
+                container.appendChild(groupDiv);
+            });
+        }
+
+        function switchTab(tabName) {
+            document.querySelectorAll('.tab-content').forEach(el => el.classList.add('hidden'));
+            document.querySelectorAll('.tab-btn').forEach(el => {
+                el.classList.remove('tab-active');
+                el.classList.add('text-slate-500');
+            });
+
+            document.getElementById(`sec-${tabName}`).classList.remove('hidden');
+            const activeTab = document.getElementById(`tab-${tabName}`);
+            activeTab.classList.add('tab-active');
+            activeTab.classList.remove('text-slate-500');
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+        }
+
+        function calculateScore() {
+            let totalSkor = 0;
+            const totalIndikator = 34; // 13 + 16 + 5
+            const skorMaksimal = totalIndikator * 4; // 136
+
+            const radioInputs = document.querySelectorAll('input[type="radio"]:checked');
+            radioInputs.forEach(input => {
+                totalSkor += parseInt(input.value);
+            });
+
+            const nilaiAkhir = (totalSkor / skorMaksimal) * 100;
+
+            document.getElementById('totalSkorDisplay').textContent = totalSkor;
+            document.getElementById('nilaiAkhirDisplay').textContent = nilaiAkhir.toFixed(2);
+
+            const badge = document.getElementById('kategoriBadge');
+            badge.className = "inline-block px-4 py-1.5 rounded-full text-base font-bold mt-2 ";
+
+            if (nilaiAkhir >= 86) {
+                badge.textContent = "Amat Baik (AB)";
+                badge.classList.add("bg-emerald-500", "text-white");
+            } else if (nilaiAkhir >= 71) {
+                badge.textContent = "Baik (B)";
+                badge.classList.add("bg-blue-500", "text-white");
+            } else if (nilaiAkhir >= 56) {
+                badge.textContent = "Cukup (C)";
+                badge.classList.add("bg-amber-500", "text-white");
+            } else {
+                badge.textContent = "Kurang (K)";
+                badge.classList.add("bg-rose-500", "text-white");
+            }
+
+            return { totalSkor, nilaiAkhir: nilaiAkhir.toFixed(2), kategori: badge.textContent };
+        }
+
+        function openSettingsModal() {
+            document.getElementById('inputScriptUrl').value = localStorage.getItem('gas_supervisi_url') || DEFAULT_GAS_URL || '';
+            document.getElementById('settingsModal').classList.remove('hidden');
+            document.getElementById('settingsModal').classList.add('flex');
+        }
+
+        function closeSettingsModal() {
+            document.getElementById('settingsModal').classList.add('hidden');
+            document.getElementById('settingsModal').classList.remove('flex');
+        }
+
+        function saveSettings() {
+            const url = document.getElementById('inputScriptUrl').value.trim();
+            if (url) {
+                localStorage.setItem('gas_supervisi_url', url);
+                alert('URL Web App Google Script berhasil disimpan!');
+            } else {
+                localStorage.removeItem('gas_supervisi_url');
+            }
+            checkScriptUrl();
+            closeSettingsModal();
+        }
+
+        function checkScriptUrl() {
+            const url = getScriptUrl();
+            const warning = document.getElementById('urlWarning');
+            if (!url) {
+                warning.classList.remove('hidden');
+            } else {
+                warning.classList.add('hidden');
+            }
+        }
+
+        async function handleFormSubmit(e) {
+            e.preventDefault();
+            const scriptUrl = getScriptUrl();
+            if (!scriptUrl) {
+                alert('URL Google Apps Script belum diisi! Silakan paste URL pada variabel DEFAULT_GAS_URL di dalam kode HTML atau melalui tombol "Set Script URL".');
+                openSettingsModal();
+                return;
+            }
+
+            const { nilaiAkhir, kategori } = calculateScore();
+
+            const formData = {
+                namaGuru: document.getElementById('namaGuru').value,
+                nip: document.getElementById('nip').value,
+                kompetensi: document.getElementById('kompetensi').value,
+                mapel: document.getElementById('mapel').value,
+                kelas: document.getElementById('kelas').value,
+                tanggal: document.getElementById('tanggal').value,
+                waktu: document.getElementById('waktu').value,
+                materi: document.getElementById('materi').value,
+                supervisor: document.getElementById('supervisor').value,
+                nilaiAkhir,
+                kategori,
+                refleksi1: document.getElementById('refleksi1').value,
+                refleksi2: document.getElementById('refleksi2').value,
+                refleksi3: document.getElementById('refleksi3').value,
+                refleksi4: document.getElementById('refleksi4').value,
+                catatanPembinaan: document.getElementById('catatanPembinaan').value
+            };
+
+            const btn = document.getElementById('btnSubmit');
+            btn.disabled = true;
+            btn.innerHTML = `<i class="fa-solid fa-spinner fa-spin"></i> Menyimpan...`;
+
+            try {
+                await fetch(scriptUrl, {
+                    method: 'POST',
+                    mode: 'no-cors',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify(formData)
+                });
+
+                alert('Data supervisi berhasil dikirim ke Google Sheets!');
+            } catch (err) {
+                alert('Terjadi kesalahan saat mengirim data: ' + err.message);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = `<i class="fa-solid fa-cloud-arrow-up"></i> Simpan ke Sheets`;
+            }
+        }
+
+        function sendWhatsApp() {
+            const namaGuru = document.getElementById('namaGuru').value;
+            if (!namaGuru) {
+                alert('Pilih Nama Guru terlebih dahulu!');
+                switchTab('identitas');
+                return;
+            }
+
+            const { nilaiAkhir, kategori } = calculateScore();
+            const mapel = document.getElementById('mapel').value;
+            const tanggal = document.getElementById('tanggal').value;
+            const supervisor = document.getElementById('supervisor').value;
+            const catatan = document.getElementById('catatanPembinaan').value;
+
+            const text = `*HASIL SUPERVISI AKADEMIK (DEEP LEARNING)*\n` +
+                `*SMK NEGERI 1 MALUKU TENGAH*\n` +
+                `-----------------------------------------\n` +
+                `*Nama Guru:* ${namaGuru}\n` +
+                `*Mata Pelajaran:* ${mapel}\n` +
+                `*Tanggal Supervisi:* ${tanggal}\n` +
+                `*Supervisor:* ${supervisor}\n\n` +
+                `*Nilai Akhir:* ${nilaiAkhir}\n` +
+                `*Predikat Kategori:* ${kategori}\n\n` +
+                `*Catatan & Tindak Lanjut:* \n_${catatan || 'Belum ada catatan'}_\n\n` +
+                `_Instrumen Supervisi Pembelajaran Mendalam (Mindful, Meaningful, Joyful)_`;
+
+            const encodedText = encodeURIComponent(text);
+            window.open(`https://wa.me/?text=${encodedText}`, '_blank');
+        }
+    </script>
+</body>
+</html>
